@@ -14,6 +14,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.speech.tts.TextToSpeech;
@@ -78,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private Button mButton;
     //获取设备电量
     private Button mSendBtn;
+    //断开设备
+    private Button disconnectDevice;
     private TextView mTextView;
     private TextView viewByIdMy;
     private SensorThread thread;
@@ -131,14 +134,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             }
         });
 
-        //获取设备实时状态
+        //获取设备实时数据
         findViewById(R.id.button2).setOnClickListener(v -> {
             if (gattGroup == null) return;
             boolean isWrite = bleUtils.writeRXCharacteristic(gattGroup, UUID_SERVICE, UUID_WRITE, EQUIPMENT_STATUS);
             if (isWrite) {
-                Log.i(TAG, "onServicesDiscovered: 数据写入成功");
+                Log.i(TAG, "onServicesDiscovered: 获取实时数据====数据写入成功");
             } else {
-                Log.i(TAG, "onServicesDiscovered: 数据写入失败");
+                Log.i(TAG, "onServicesDiscovered: 获取实时数据====数据写入失败");
             }
         });
 
@@ -147,9 +150,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             if (gattGroup == null) return;
             boolean isWrite = bleUtils.writeRXCharacteristic(gattGroup, UUID_SERVICE, UUID_WRITE, STOP_EQUIPMENT_STATUS);
             if (isWrite) {
-                Log.i(TAG, "onServicesDiscovered: 数据写入成功");
+                Log.i(TAG, "onServicesDiscovered: 停止获取实时数据====数据写入成功");
             } else {
-                Log.i(TAG, "onServicesDiscovered: 数据写入失败");
+                Log.i(TAG, "onServicesDiscovered: 停止获取实时数据====数据写入失败");
             }
         });
         //获取实时计步
@@ -157,9 +160,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             if (gattGroup == null) return;
             boolean isWrite = bleUtils.writeRXCharacteristic(gattGroup, UUID_SERVICE, UUID_WRITE, STEP_COUNTING);
             if (isWrite) {
-                Log.i(TAG, "onServicesDiscovered: 数据写入成功");
+                Log.i(TAG, "onServicesDiscovered: 获取实时计步====数据写入成功");
             } else {
-                Log.i(TAG, "onServicesDiscovered: 数据写入失败");
+                Log.i(TAG, "onServicesDiscovered: 获取实时计步====数据写入失败");
             }
         });
 
@@ -170,9 +173,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             Log.i(TAG, "数据写入：" + getOffLineStepCounting());
             if (isWrite) {
                 offLineList.clear();
-                Log.i(TAG, "onServicesDiscovered: 数据写入成功");
+                Log.i(TAG, "onServicesDiscovered:获取离线计步==== 数据写入成功");
             } else {
-                Log.i(TAG, "onServicesDiscovered: 数据写入失败");
+                Log.i(TAG, "onServicesDiscovered:获取离线计步==== 数据写入失败");
             }
         });
 
@@ -183,9 +186,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 boolean isWrite = bleUtils.writeRXCharacteristic(gattGroup, UUID_SERVICE, UUID_WRITE, getCalibrationTime());
                 Log.i(TAG, "数据写入：" + getCalibrationTime());
                 if (isWrite) {
-                    Log.i(TAG, "onServicesDiscovered: 数据写入成功");
+                    Log.i(TAG, "onServicesDiscovered: 时间校准======数据写入成功");
                 } else {
-                    Log.i(TAG, "onServicesDiscovered: 数据写入失败");
+                    Log.i(TAG, "onServicesDiscovered: 时间校准======数据写入失败");
                 }
 
 //                String buttonText = mButton.getText().toString();
@@ -232,6 +235,22 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 //                    thread.sensorAIHandler.sendMessage(msg1);
 //                    mButton.setText("开始训练");
 //                }
+            }
+        });
+        /**
+         * 断开设备
+         */
+        disconnectDevice=findViewById(R.id.button6);
+        disconnectDevice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (gattGroup == null) return;
+                boolean isWrite = bleUtils.writeRXCharacteristic(gattGroup, UUID_SERVICE, UUID_WRITE, disConnectDeviceCommand(connectedDevice).replace(":",""));
+                if (isWrite) {
+                    Log.i(TAG, "onServicesDiscovered: 断开设备==========数据写入成功");
+                } else {
+                    Log.i(TAG, "onServicesDiscovered: 断开设备==========数据写入失败");
+                }
             }
         });
         mainHandler = new MainHandler();
@@ -372,6 +391,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 //                +"0800ACAD";
         String data = "BCBD02A201ACAD";
         return data;
+    }
+
+    private String disConnectDeviceCommand(String mac){
+        return "BCBD08A0"+mac+"00ACAD";
     }
 
 
@@ -620,6 +643,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 //        this.bluetoothGatt = bluetoothGatt;
     }
 
+ private String connectedDevice;
 
     /**
      * 第一个设备  蓝牙返回数据函数
@@ -629,6 +653,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    connectedDevice=gatt.getDevice().getAddress();
                     Log.i("123214143142", "设备连接成功 ：" + gatt.getDevice().getAddress());
                     ShowToast("设备连接成功");
                     //搜索Service
@@ -689,8 +714,19 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         if (str.contains("bc bd 0a a4")) {
             //电量
-            String newStr = "电量： " + characteristic.getValue()[characteristic.getValue().length - 6];
-            mTextView.setText(newStr);
+            byte[] stepByte = new byte[1];
+            stepByte[0] = characteristic.getValue()[characteristic.getValue().length - 6];
+            String aa =  "电量： " + HexUtil.formatHexString(stepByte);
+//            String newStr = "电量： " + characteristic.getValue()[characteristic.getValue().length - 6];
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTextView.setText(aa);
+                    Toast.makeText(MainActivity.this,"电量"+aa,Toast.LENGTH_LONG).show();
+                }
+            });
+
         } else if (str.contains("bc bd 07 a5")) {
             byte[] stepByte = new byte[1];
             stepByte[0] = characteristic.getValue()[characteristic.getValue().length - 3];
@@ -698,6 +734,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             //实时计步
             String newStr = "实时步数： " + HexUtil.hexToDec(aa);
             mTextView.setText(newStr);
+
         } else if (str.contains("bc bd 41 00 a2")) {
             //离线计步
             byte[] stepByte = new byte[64];
@@ -732,7 +769,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
             }
         } else {
-            mTextView.setText(str);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTextView.setText(str);
+                }
+            });
+
         }
 
 
