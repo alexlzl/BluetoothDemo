@@ -193,6 +193,46 @@ public class Rule {
         return false;
     };
 
+    /*关节角度最大值差与最小差的值大于参数*/
+    public boolean jointMaxAnglesDiffMinAngleGreaterThan(int angle, int jointMax, int jointMin){
+        if (jointMax !=0 && jointMin != 370) {
+            if (jointMax  - jointMin >= angle) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    /*关节角度最大值差与最小差的值小雨于参数*/
+    public boolean jointMaxAnglesDiffMinAngleLessThan(int angle, int jointMax, int jointMin){
+        if (jointMax !=0 && jointMin != 370) {
+            if (jointMax  - jointMin <= angle) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    /*身体部位与最小值差的值大于参数*/
+    public boolean segmentMaxAnglesDiffMinAngleGreaterThan(int angle,int sensorMax,int segmentMin){
+        if (segmentMin !=370 && sensorMax != 0) {
+            if (sensorMax - segmentMin >= angle) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    /*身体部位与最小值差的值大于参数*/
+    public boolean segmentMaxAnglesDiffMinAngleLessThan(int angle,int sensorMax,int segmentMin){
+        if (segmentMin !=370 && sensorMax != 0) {
+            if (sensorMax - segmentMin <= angle) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     /*身体部位与最小值差的值大于参数*/
     public boolean segmentMinAnglesDiffGreaterThan(int sensorAngle, int angle,int segmentMin){
         if (segmentMin !=370 ) {
@@ -414,6 +454,14 @@ public class Rule {
                 return exceptionLessThan(timerM, ruleParam);
             case "bufferTimer":
                 return bufferTimer();
+            case "jointMaxAnglesDiffMinAngleGreaterThan":
+                return jointMaxAnglesDiffMinAngleGreaterThan(ruleParam,angleMax,angleMin);
+            case "jointMaxAnglesDiffMinAngleLessThan":
+                return jointMaxAnglesDiffMinAngleLessThan(ruleParam,angleMax,angleMin);
+            case "segmentMaxAnglesDiffMinAngleGreaterThan":
+                return segmentMaxAnglesDiffMinAngleGreaterThan(ruleParam,segmentMax,segmentMin);
+            case "segmentMaxAnglesDiffMinAngleLessThan":
+                return segmentMaxAnglesDiffMinAngleLessThan(ruleParam,segmentMax,segmentMin);
         }
         return false;
     };
