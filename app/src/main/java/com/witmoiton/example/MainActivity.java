@@ -716,14 +716,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             //电量
             byte[] stepByte = new byte[1];
             stepByte[0] = characteristic.getValue()[characteristic.getValue().length - 6];
-            String aa =  "电量： " + HexUtil.formatHexString(stepByte);
+            String aa =  "电量： " +HexUtil.hexToDec(HexUtil.formatHexString(stepByte)) ;
 //            String newStr = "电量： " + characteristic.getValue()[characteristic.getValue().length - 6];
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mTextView.setText(aa);
-                    Toast.makeText(MainActivity.this,"电量"+aa,Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this,aa,Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -733,7 +733,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             String aa = HexUtil.formatHexString(stepByte);
             //实时计步
             String newStr = "实时步数： " + HexUtil.hexToDec(aa);
-            mTextView.setText(newStr);
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTextView.setText(newStr);
+                    Toast.makeText(MainActivity.this,newStr,Toast.LENGTH_LONG).show();
+                }
+            });
 
         } else if (str.contains("bc bd 41 00 a2")) {
             //离线计步
