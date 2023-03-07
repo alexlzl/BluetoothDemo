@@ -715,7 +715,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         if (str.contains("bc bd 0a a4")) {
             //电量
             byte[] stepByte = new byte[1];
-            stepByte[0] = characteristic.getValue()[characteristic.getValue().length - 6];
+            stepByte[0] = characteristic.getValue()[characteristic.getValue().length - 7];
             String aa =  "电量： " +HexUtil.hexToDec(HexUtil.formatHexString(stepByte)) ;
 //            String newStr = "电量： " + characteristic.getValue()[characteristic.getValue().length - 6];
 
@@ -743,6 +743,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             });
 
         } else if (str.contains("bc bd 41 00 a2")) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this,"离线计步获取成功",Toast.LENGTH_LONG).show();
+                }
+            });
             //离线计步
             byte[] stepByte = new byte[64];
             offLineList.add(characteristic);
@@ -775,7 +781,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             if (offLineList.size() == 24) {
 
             }
-        } else {
+        } else if(str.contains("bc bd 02 a7 01")){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this,"时间校准成功",Toast.LENGTH_LONG).show();
+                }
+            });
+
+        }else {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
